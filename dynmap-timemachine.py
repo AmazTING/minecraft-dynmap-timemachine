@@ -1,12 +1,12 @@
-#!/usr/bin/env python
-
 import logging
 import argparse
 import glob
 import sys
 import time
 import os
+import pyvips
 from PIL import Image
+
 
 import minecraft_dynmap_timemachine.dynmap as dynmap
 import minecraft_dynmap_timemachine.time_machine as time_machine
@@ -14,8 +14,9 @@ import minecraft_dynmap_timemachine.projection as projection
 
 
 if __name__ == '__main__':
+    start = time.time()
     parser = argparse.ArgumentParser()
-    parser.add_argument('base_url', help='Dynamp server URL')
+    parser.add_argument('base_url', help='Dynmap server URL')
     parser.add_argument('world', nargs='?', help='world name, use --list-worlds to list available worlds')
     parser.add_argument('map', nargs='?', help='map name, use --list-maps to list available maps')
     parser.add_argument('center', nargs='?', help='minecraft cooridnates, use format: [x,y,z]')
@@ -89,8 +90,10 @@ if __name__ == '__main__':
         zoom = int(args.zoom)
         img = tm.capture_single(dm_map, m_loc.to_tile_location(zoom), size)
 
+        del tm
+
         if os.path.isdir(dest):
-            files = list(glob.iglob(os.path.join(dest, '*.png')))
+            files = list(glob.iglob(os.path.join(dest, '*.webp')))
             difference = 0
             if files:
                 newest_image = max(files, key=os.path.getctime)
@@ -98,11 +101,13 @@ if __name__ == '__main__':
                 threshold = float(args.threshold)
 
             if not files or difference >= threshold:
-                dest = os.path.join(dest, time.strftime('%Y-%m-%d %H-%M-%S') + '.png')
-                img.save(dest)
+                dest = os.path.join(dest, time.strftime('%Y-%m-%d %H-%M-%S') + '.tif')
+                img.write_to_file(dest, compression="jpeg", tile=True, bigtiff=True)
                 logging.info('saving timelapse image to "%s" (%d KB) with difference %.2f', dest, os.path.getsize(dest) / 1000, difference * 100)
         else:
-            img.save(dest)
-            logging.info('saving image to "%s" (%d KB)', dest, os.path.getsize(dest) / 1000)
+            img.write_to_file(dest, compression="deflate", tile=True, bigtiff=True)
+            logging.info('saving image to "%s" (%d MB)', dest, os.path.getsize(dest) / 1000000)
 
         # sys.exit(0)
+        end = time.time()
+    logging.info('done in %.2f seconds', end - start)

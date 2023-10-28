@@ -131,7 +131,7 @@ class Map(object):
         chunk_y = math.floor(t_loc.y / 32.0)
         dashes = ('' if zoom == 0 else ('z' * zoom) + '_')
 
-        image_url = '/tiles/%s/%s/%d_%d/%s%d_%d.png' % (self._world, self.prefix, chunk_x, chunk_y, dashes, t_loc.x, t_loc.y)
+        image_url = '/tiles/%s/%s/%d_%d/%s%d_%d.webp' % (self._world, self.prefix, chunk_x, chunk_y, dashes, t_loc.x, t_loc.y)
         return image_url
 
     @property

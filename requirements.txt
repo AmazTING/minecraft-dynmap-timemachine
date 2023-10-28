@@ -1,2 +1,5 @@
-Pillow
-requests
+Pillow~=10.1.0
+requests~=2.31.0
+tqdm~=4.62.3
+setuptools~=65.5.1
+pyvips~=2.2.1
